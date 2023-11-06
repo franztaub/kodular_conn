@@ -85,6 +85,38 @@ router.post('/',(req, res, next) => {
     
 });
 
+
+// Route for user authentication (login)
+router.post('/login', (req, res, next) => {
+  const { username, password } = req.body;
+
+  // Query the database to find a user with the provided username
+  Renter.findOne({ username: username })
+    .exec()
+    .then((user) => {
+      if (!user) {
+        // User not found
+        return res.status(401).json({ message: 'Wrong Username' });
+      }
+
+      // Compare the provided password with the stored hashed password
+      bcrypt.compare(password, user.password, (err, result) => {
+        if (err || !result) {
+          // Password does not match
+          return res.status(401).json({ message: 'Wrong Password' });
+        }
+
+        // Password matches; you can generate an authentication token here if needed
+
+        return res.status(200).json({ message: 'Authentication successful' });
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ error: err });
+    });
+});
+
 router.get('/:RENTERID', (req, res, next) => {
     const id = req.params.RENTERID;
     Renter.findById(id).exec().then(result => {console.log("From Database",result); 
